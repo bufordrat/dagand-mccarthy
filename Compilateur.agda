@@ -65,7 +65,8 @@ ex₃ = PUSH (isNat 1) #
 
 -- Compiler
 
-compile : exp → code
-compile (val v) = {!!}
-compile (plus exp₁ exp₂) = {!!}
-compile (ifte exp₁ exp₂ exp₃) = {!!}
+-- compile : exp → code
+-- compile (val (isBool b)) = PUSH (isBool b)
+-- compile (val (isNat n)) = PUSH (isNat n)
+-- compile (plus e₁ e₂) = {!PUSH (compile e₁) # PUSH (compi)!}
+-- compile (ifte e₁ e₂ e₃) = {!!}
