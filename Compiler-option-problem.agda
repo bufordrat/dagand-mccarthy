@@ -1,5 +1,8 @@
+module Compiler-option-problem where
+
 open import Data.Bool
 open import Data.Nat
+open import Data.Maybe using (Maybe; just; nothing)
 
 -- Expressions
 
@@ -31,6 +34,17 @@ ex₂ = plus
       (ifte (val (isBool true))
             (val (isNat 3))
             (plus (val (isNat 1)) (val (isNat 7))))
+
+semE : exp → Maybe value
+semE (val v) = just v
+semE (plus e₁ e₂) with semE e₁ | semE e₂
+... | just (isBool b) | _ = nothing
+... | _ | just (isBool b) = nothing
+... | just (isNat n₁) | just (isNat n₂) = just (isNat (n₁ + n₂))
+... | just (isNat n) | nothing = nothing
+... | nothing | _ = nothing
+semE (ifte b e₁ e₂) = {!!}
+
 
 -- Stack Machine
 
@@ -66,6 +80,6 @@ ex₃ = PUSH (isNat 1) #
 -- Compiler
 
 compile : exp → code
-compile (val v) = {!!}
-compile (plus exp₁ exp₂) = {!!}
-compile (ifte exp₁ exp₂ exp₃) = {!!}
+compile (val v) = PUSH v
+compile (plus e₁ e₂) = compile e₁ # compile e₂ # ADD
+compile (ifte b e₁ e₂) = compile b # IFTE (compile e₁) (compile e₂)
