@@ -7,10 +7,6 @@ open import Data.List
 
 -- Expressions
 
--- v ::=            (values) 
--- | true | false   (booleans)
--- | 0 | 1 | ...    (naturals)
-
 data type : Set where
   nat : type
   bool : type
@@ -20,11 +16,6 @@ variable T : type
 value : type → Set
 value nat = ℕ
 value bool = Bool
-
--- -- b, e₁, e₂ ::=    (expressions)
--- -- | v             (value)
--- -- | plus e₁ e₂     (addition)
--- -- | ifte b e₁ e₂   (conditional)
 
 data exp : type → Set where
   val : (v : value T) → exp T
@@ -41,6 +32,8 @@ ex₂ = plus
             (val 2)
             (plus (val 1) (val 7)))
 
+-- Direct Evaluation
+
 semE : exp T → value T
 semE (val v) = v
 semE (plus e₁ e₂) = semE e₁ + semE e₂
@@ -54,11 +47,7 @@ test-ex₁ = refl
 test-ex₂ : semE ex₂ ≡ 4
 test-ex₂ = refl
 
--- -- Stack Machine
-
--- -- π ::=       (stack)
--- -- | ϵ         (empty stack)
--- -- | v ∙ π     (value on a stack)
+-- Stack Machine
 
 type-stack : Set
 type-stack = List type
@@ -76,13 +65,6 @@ hd (x ∙ π) = x
 
 tl : stack (T ∷ σ) → stack σ
 tl (x ∙ π) = π
-
--- -- c₁, c₂ ::=         (stack machine)
--- -- | SKIP
--- -- | PUSH v          (value on a stack)
--- -- | ADD             (addition on a stack)
--- -- | IFTE c₁ c₂       (conditional on a stack)
--- -- | c₁ # c₂          (sequence)
 
 data code : type-stack → type-stack → Set where
   SKIP : code σ σ
@@ -105,6 +87,8 @@ ex₄ = PUSH 2 #
            (PUSH 1 # PUSH 2 # ADD) #
       ADD
 
+-- Interpreting Machine Instructions
+
 semC : code σ₁ σ₂ → stack σ₁ → stack σ₂
 semC SKIP π                   = π
 semC (PUSH v) π               = v ∙ π
@@ -113,26 +97,25 @@ semC (IFTE c₁ c₂) (true ∙ π)  = semC c₁ π
 semC (IFTE c₁ c₂) (false ∙ π) = semC c₂ π
 semC (c₁ # c₂) π              = semC c₂ (semC c₁ π)
 
-
--- semC : code σ₁ σ₂ → stack σ₁ -> stack σ₂
--- semC SKIP π = π
--- semC (PUSH v) π = v ∙ π
--- semC ADD (x ∙ x₁ ∙ π) = x + x₁ ∙ π
--- semC (IFTE c c₁) (false ∙ π) = semC c π
--- semC (IFTE c c₁) (true ∙ π) = semC c₁ π
--- semC (c # c₁) π = semC c₁ (semC c π)
-
 -- Compiler
 
 compile : exp T → code σ (T ∷ σ)
 compile (val v) = PUSH v
-compile (plus e₁ e₂) = compile e₁ #
-                       compile e₂ #
+compile (plus e₁ e₂) = compile e₂ #
+                       compile e₁ #
                        ADD
 compile (ifte b e₁ e₂) = compile b #
-                         IFTE (compile e₁) (compile e₂)
+                         IFTE (compile e₁)
+                              (compile e₂)
 
 verification : (e : exp T) (π : stack σ) → semC (compile e) π ≡ semE e ∙ π
 verification (val v) π = refl
-verification (plus e₁ e₂) π rewrite verification e₂ π | verification e₁ (semE e₂ ∙ π) = {!!}
-verification (ifte b e₁ e₂) π = {!!}
+verification (plus e₁ e₂) π
+  rewrite verification e₂ π
+        | verification e₁ (semE e₂ ∙ π) = refl
+verification (ifte b e₁ e₂) π
+  rewrite verification b π
+  with semE b
+... | true = verification e₁ π
+... | false = verification e₂ π
+
