@@ -69,6 +69,8 @@ data stack : type-stack → Set where
   ϵ : stack []
   _·_ : value T → stack σ → stack (T ∷ σ)
 
+infixr 5 _·_
+
 hd : stack (T ∷ σ) → value T
 hd (x · π) = x
 
@@ -82,19 +84,33 @@ tl (x · π) = π
 -- -- | IFTE c₁ c₂       (conditional on a stack)
 -- -- | c₁ # c₂          (sequence)
 
--- data code : Set where
---   SKIP : code
---   PUSH : (v : value) → code
---   ADD : code
---   IFTE : (c₁ : code) (c₂ : code) → code
---   _#_ : (c₁ : code) (c₂ : code) → code
+data code : type-stack → type-stack → Set where
+  SKIP : code σ σ
+  PUSH : (v : value T) → code σ (T ∷ σ)
+  ADD : code (nat ∷ nat ∷ σ) (nat ∷ σ)
+  IFTE : (c₁ : code σ σ₁) (c₂ : code σ σ₁) → code (bool ∷ σ) σ₁
+  _#_ : (c₁ : code σ₁ σ₂) (c₂ : code σ₂ σ₃) → code σ₁ σ₃
 
--- infixr 20 _#_
+infixr 20 _#_
 
--- ex₃ : code
--- ex₃ = PUSH (isNat 1) #
---       PUSH (isNat 1) #
---       ADD
+ex₃ : code [] (nat ∷ [])
+ex₃ = PUSH 1 #
+      PUSH 1 #
+      ADD
+
+ex₄ : code [] (nat ∷ [])
+ex₄ = PUSH 2 #
+      PUSH true #
+      IFTE (PUSH 3)
+           (PUSH 1 # PUSH 2 # ADD) #
+      ADD
+
+semC : code σ₁ σ₂ → stack σ₁ -> stack σ₂
+semC SKIP π = π
+semC (PUSH v) π = v · π
+semC ADD (x · x₁ · π) = {!!}
+semC (IFTE c c₁) π = {!!}
+semC (c # c₁) π = {!!}
 
 -- -- Compiler
 
