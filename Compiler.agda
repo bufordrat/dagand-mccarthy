@@ -58,7 +58,7 @@ test-ex₂ = refl
 
 -- -- π ::=       (stack)
 -- -- | ϵ         (empty stack)
--- -- | v · π     (value on a stack)
+-- -- | v ∙ π     (value on a stack)
 
 type-stack : Set
 type-stack = List type
@@ -67,15 +67,15 @@ variable σ σ₁ σ₂ σ₃ : type-stack
 
 data stack : type-stack → Set where
   ϵ : stack []
-  _·_ : value T → stack σ → stack (T ∷ σ)
+  _∙_ : value T → stack σ → stack (T ∷ σ)
 
-infixr 5 _·_
+infixr 5 _∙_
 
 hd : stack (T ∷ σ) → value T
-hd (x · π) = x
+hd (x ∙ π) = x
 
 tl : stack (T ∷ σ) → stack σ
-tl (x · π) = π
+tl (x ∙ π) = π
 
 -- -- c₁, c₂ ::=         (stack machine)
 -- -- | SKIP
@@ -105,16 +105,34 @@ ex₄ = PUSH 2 #
            (PUSH 1 # PUSH 2 # ADD) #
       ADD
 
-semC : code σ₁ σ₂ → stack σ₁ -> stack σ₂
-semC SKIP π = π
-semC (PUSH v) π = v · π
-semC ADD (x · x₁ · π) = {!!}
-semC (IFTE c c₁) π = {!!}
-semC (c # c₁) π = {!!}
+semC : code σ₁ σ₂ → stack σ₁ → stack σ₂
+semC SKIP π                   = π
+semC (PUSH v) π               = v ∙ π
+semC ADD (m ∙ n ∙ π)          = m + n ∙ π
+semC (IFTE c₁ c₂) (true ∙ π)  = semC c₁ π
+semC (IFTE c₁ c₂) (false ∙ π) = semC c₂ π
+semC (c₁ # c₂) π              = semC c₂ (semC c₁ π)
 
--- -- Compiler
 
--- compile : exp → code
--- compile (val v) = PUSH v
--- compile (plus e₁ e₂) = compile e₁ # compile e₂ # ADD
--- compile (ifte b e₁ e₂) = compile b # IFTE (compile e₁) (compile e₂)
+-- semC : code σ₁ σ₂ → stack σ₁ -> stack σ₂
+-- semC SKIP π = π
+-- semC (PUSH v) π = v ∙ π
+-- semC ADD (x ∙ x₁ ∙ π) = x + x₁ ∙ π
+-- semC (IFTE c c₁) (false ∙ π) = semC c π
+-- semC (IFTE c c₁) (true ∙ π) = semC c₁ π
+-- semC (c # c₁) π = semC c₁ (semC c π)
+
+-- Compiler
+
+compile : exp T → code σ (T ∷ σ)
+compile (val v) = PUSH v
+compile (plus e₁ e₂) = compile e₁ #
+                       compile e₂ #
+                       ADD
+compile (ifte b e₁ e₂) = compile b #
+                         IFTE (compile e₁) (compile e₂)
+
+verification : (e : exp T) (π : stack σ) → semC (compile e) π ≡ semE e ∙ π
+verification (val v) π = refl
+verification (plus e₁ e₂) π rewrite verification e₂ π | verification e₁ (semE e₂ ∙ π) = {!!}
+verification (ifte b e₁ e₂) π = {!!}
