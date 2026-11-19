@@ -10,7 +10,6 @@ open import Data.Maybe using (Maybe; just; nothing)
 -- | true | false   (booleans)
 -- | 0 | 1 | ...    (naturals)
 
-
 data value : Set where
   isBool : (b : Bool) → value
   isNat : (n : ℕ) → value

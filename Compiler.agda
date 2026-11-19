@@ -3,6 +3,7 @@ module Compiler where
 open import Relation.Binary.PropositionalEquality using (_≡_; refl; trans; sym; cong; subst)
 open import Data.Bool using (Bool; true; false; if_then_else_)
 open import Data.Nat
+open import Data.List
 
 -- Expressions
 
@@ -50,15 +51,29 @@ semE (ifte b e₁ e₂) = if semE b
 test-ex₁ : semE ex₁ ≡ 2
 test-ex₁ = refl
 
+test-ex₂ : semE ex₂ ≡ 4
+test-ex₂ = refl
+
 -- -- Stack Machine
 
 -- -- π ::=       (stack)
 -- -- | ϵ         (empty stack)
 -- -- | v · π     (value on a stack)
 
--- data stack : Set where
---   ϵ : stack
---   _·_ : (v : value) (π : stack) → stack
+type-stack : Set
+type-stack = List type
+
+variable σ σ₁ σ₂ σ₃ : type-stack
+
+data stack : type-stack → Set where
+  ϵ : stack []
+  _·_ : value T → stack σ → stack (T ∷ σ)
+
+hd : stack (T ∷ σ) → value T
+hd (x · π) = x
+
+tl : stack (T ∷ σ) → stack σ
+tl (x · π) = π
 
 -- -- c₁, c₂ ::=         (stack machine)
 -- -- | SKIP
