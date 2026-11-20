@@ -33,9 +33,9 @@ data stack : Set where
 infixr 5 _∙_
 
 data code : Set where
-  SKIP :                          code
-  PUSH : (v : value)           → code
-  ADD  :                          code
+  SKIP : code
+  PUSH : (v : value) → code
+  ADD  : code
   IFTE : (c₁ : code)(c₂ : code) → code
   _#_  : (c₁ : code)(c₂ : code) → code
 
