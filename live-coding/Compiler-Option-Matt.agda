@@ -5,13 +5,13 @@ open import Lib
 -- --------------------------------
 
 data value : Set where
-  isNat  : (n : ℕ)    → value
+  isNat  : (n : ℕ) → value
   isBool : (b : Bool) → value
 
 data exp : Set where
   val  : (v : value) → exp
   plus : (e₁ : exp) → (e₂ : exp) → exp
-  ifte : (b : exp)(e₁ : exp)(e₂ : exp) → exp
+  ifte : (b : exp) → (e₁ : exp) → (e₂ : exp) → exp
 
 ex₁ : exp
 ex₁ = plus (val (isNat 1)) (val (isNat 1))
@@ -23,24 +23,15 @@ ex₂ = plus (val (isNat 2))
                  (plus (val (isNat 1)) (val (isNat 7))))
 
 semE : exp → Option value
-semE (val v) = OK v
-semE (plus e₁ e₂)
-  with semE e₁ | semE e₂
-... | OK (isNat n₁) | OK (isNat n₂) = OK (isNat (n₁ + n₂))
-... | OK (isBool b) | _ = KO
-... | OK (isNat n₁) | OK (isBool b) = KO
-... | OK v | KO = KO
-... | KO | _ = KO
-semE (ifte b e₁ e₂)
-  with semE b | semE e₁ | semE e₂
-... | OK (isBool v) | v₁ | v₂ = if v then v₁ else v₂
-... | _ | _ | _ = KO
+semE (val v) = {!!}
+semE (plus e₁ e₂) = {!!}
+semE (ifte b e₁ e₂) = {!!}
 
 test-ex₁ : semE ex₁ ≡ OK (isNat 2)
-test-ex₁ = refl
+test-ex₁ = {!!}
 
 test-ex₂ : semE ex₂ ≡ OK (isNat 5)
-test-ex₂ = refl
+test-ex₂ = {!!}
 
 -- --------------------------------
 -- Stack Machine
