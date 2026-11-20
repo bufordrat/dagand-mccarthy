@@ -80,7 +80,7 @@ data code : type-stack → type-stack → Set where
   PUSH : {!!} → code {!!} {!!}
   ADD : code {!!} {!!}
   IFTE : {!!} → {!!} → code {!!} {!!}
-  _#_ : (c₁ : code σ₁ σ₂) → (c₂ : code σ₂ σ₃) → code σ₁ σ₃
+  _#_ : {!!} → {!!} → code {!!} {!!}
 
 infixr 20 _#_
 
@@ -97,7 +97,7 @@ infixr 20 _#_
 --       ADD
 
 semC : code σ₁ σ₂ → stack σ₁ → stack σ₂
-semC c = {!!}
+semC c stk = {!!}
 
 -- --------------------------------
 -- Compiler
